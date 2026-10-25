@@ -4,7 +4,10 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$DIR"
 
-echo "=== Building iPaper (Release) ==="
+VERSION="1.0.1"
+BUILD_NUM="2"
+
+echo "=== Building iPaper (Release v${VERSION}) ==="
 swift build -c release
 
 BIN_DIR=$(swift build -c release --show-bin-path)
@@ -46,7 +49,7 @@ for bundle in "$BIN_DIR"/*.bundle; do
 done
 
 # Write Info.plist
-cat << 'PLIST' > "$CONTENTS/Info.plist"
+cat << PLIST > "$CONTENTS/Info.plist"
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -66,9 +69,9 @@ cat << 'PLIST' > "$CONTENTS/Info.plist"
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
+    <string>${VERSION}</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>${BUILD_NUM}</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>NSHighResolutionCapable</key>
