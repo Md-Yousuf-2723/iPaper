@@ -189,10 +189,14 @@ public struct VideoPreviewView: View {
     }
 }
 
-struct AVPlayerRepresentable: NSViewRepresentable {
-    let player: AVPlayer?
+public struct AVPlayerRepresentable: NSViewRepresentable {
+    public let player: AVPlayer?
     
-    func makeNSView(context: Context) -> AVPlayerView {
+    public init(player: AVPlayer?) {
+        self.player = player
+    }
+    
+    public func makeNSView(context: Context) -> AVPlayerView {
         let view = AVPlayerView()
         view.controlsStyle = .none
         view.videoGravity = .resizeAspectFill
@@ -200,7 +204,7 @@ struct AVPlayerRepresentable: NSViewRepresentable {
         return view
     }
     
-    func updateNSView(_ nsView: AVPlayerView, context: Context) {
+    public func updateNSView(_ nsView: AVPlayerView, context: Context) {
         nsView.player = player
     }
 }

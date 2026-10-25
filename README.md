@@ -15,7 +15,8 @@ For Mac m1, m2, m3, m4 and later apple chips
 ## Homebrew Installation
 
 ```bash
-brew tap Md-Yousuf-2723/tap
+brew tap md-yousuf-2723/tap
+brew trust md-yousuf-2723/tap
 brew install --cask ipaper
 ```
 

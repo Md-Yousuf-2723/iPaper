@@ -83,6 +83,10 @@ public final class WallpaperEngine: ObservableObject {
         return windows[displayID] != nil
     }
     
+    public func activeWallpaperURL(for displayID: CGDirectDisplayID) -> URL? {
+        return activeWallpapers[displayID]
+    }
+    
     public func stop(displayID: CGDirectDisplayID? = nil) {
         if let displayID = displayID {
             stopScreen(displayID: displayID)

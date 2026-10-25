@@ -259,6 +259,41 @@ func runTests() async {
             state.stopAllWallpapers()
         }
         assertTest(!state.isPlaying, "stopAllWallpapers stopped all instances cleanly")
+
+        // Test per-display application and query methods
+        let validRealMeta = VideoMetadata(
+            fileURL: testVideoPath,
+            fileName: testVideoPath.lastPathComponent,
+            fileSize: 1024,
+            width: 1280,
+            height: 720,
+            durationSeconds: 1.0,
+            frameRate: 30.0,
+            codecName: "H.264"
+        )
+        if let first = displays.first {
+            autoreleasepool {
+                state.applyWallpaper(validRealMeta, toDisplayID: first.id)
+            }
+            assertTest(state.activeWallpaperURL(for: first.id) == validRealMeta.fileURL, "activeWallpaperURL matches for display: \(first.name)")
+            assertTest(state.activeWallpaperMetadata(for: first.id)?.fileName == validRealMeta.fileName, "activeWallpaperMetadata resolves correctly")
+            autoreleasepool {
+                state.stopWallpaper(on: first.id)
+            }
+            assertTest(!engine.isWallpaperActive(on: first.id), "stopWallpaper(on:) stops targeted display without stopping other displays")
+        }
+
+        // Test MenuBarViewModel screen detection & preview lifecycle
+        let menuVM = MenuBarViewModel()
+        assertTest(menuVM.activeDisplayID > 0, "MenuBarViewModel detected valid active display ID (\(menuVM.activeDisplayID))")
+        autoreleasepool {
+            menuVM.updatePreview(for: testVideoPath)
+        }
+        assertTest(menuVM.previewPlayer != nil, "MenuBarViewModel started video preview player")
+        autoreleasepool {
+            menuVM.teardownPreview()
+        }
+        assertTest(menuVM.previewPlayer == nil, "MenuBarViewModel tore down video preview cleanly")
     } else {
         assertTest(false, "Test video file missing for Suite 5")
     }

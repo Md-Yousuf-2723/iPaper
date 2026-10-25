@@ -4,7 +4,7 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$DIR"
 
-VERSION="1.0.4"
+VERSION="1.0.5"
 ZIP_NAME="iPaper-v${VERSION}-macOS.zip"
 
 echo "=== Building Release Bundle ==="

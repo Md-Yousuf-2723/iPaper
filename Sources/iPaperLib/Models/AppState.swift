@@ -85,6 +85,45 @@ public final class AppState: ObservableObject {
         applyCurrentWallpaper()
     }
     
+    public func isWallpaperActive(on displayID: CGDirectDisplayID) -> Bool {
+        return engine.isWallpaperActive(on: displayID)
+    }
+    
+    public func activeWallpaperURL(for displayID: CGDirectDisplayID) -> URL? {
+        return engine.activeWallpaperURL(for: displayID)
+    }
+    
+    public func activeWallpaperMetadata(for displayID: CGDirectDisplayID) -> VideoMetadata? {
+        guard let url = engine.activeWallpaperURL(for: displayID) else { return nil }
+        if let match = recentWallpapers.first(where: { $0.fileURL == url }) {
+            return match
+        }
+        if let selected = selectedVideo, selected.fileURL == url {
+            return selected
+        }
+        return nil
+    }
+    
+    public func applyWallpaper(_ video: VideoMetadata, toDisplayID displayID: CGDirectDisplayID) {
+        self.selectedVideo = video
+        self.targetDisplayID = displayID
+        engine.apply(videoURL: video.fileURL, forDisplayID: displayID)
+        self.isPlaying = engine.isPlaying
+        
+        UserDefaults.standard.set(video.fileURL.path, forKey: lastVideoPathKey)
+        UserDefaults.standard.set(Int(displayID), forKey: lastDisplayKey)
+        addToRecents(video)
+    }
+    
+    public func stopWallpaper(on displayID: CGDirectDisplayID) {
+        engine.stop(displayID: displayID)
+        self.isPlaying = engine.isPlaying
+        if !isPlaying {
+            UserDefaults.standard.removeObject(forKey: lastVideoPathKey)
+            UserDefaults.standard.removeObject(forKey: lastDisplayKey)
+        }
+    }
+    
     public func stopWallpaper() {
         if let target = targetDisplayID, engine.isWallpaperActive(on: target) {
             engine.stop(displayID: target)
