@@ -1,0 +1,3 @@
+import iPaperLib
+
+iPaperApp.main()
