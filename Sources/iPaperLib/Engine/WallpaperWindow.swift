@@ -6,16 +6,17 @@ public final class WallpaperWindow: NSWindow {
     
     public init(screen: NSScreen, displayID: CGDirectDisplayID) {
         self.displayID = displayID
-        self.playerView = VideoPlayerView(frame: screen.frame)
+        let localBounds = NSRect(origin: .zero, size: screen.frame.size)
+        self.playerView = VideoPlayerView(frame: localBounds)
         
         super.init(
             contentRect: screen.frame,
             styleMask: [.borderless],
             backing: .buffered,
-            defer: false,
-            screen: screen
+            defer: false
         )
         
+        self.setFrame(screen.frame, display: true)
         setupWindow()
     }
     
@@ -26,8 +27,10 @@ public final class WallpaperWindow: NSWindow {
         defer flag: Bool
     ) {
         self.displayID = 0
-        self.playerView = VideoPlayerView(frame: contentRect)
+        let localBounds = NSRect(origin: .zero, size: contentRect.size)
+        self.playerView = VideoPlayerView(frame: localBounds)
         super.init(contentRect: contentRect, styleMask: [.borderless], backing: backingStoreType, defer: flag)
+        self.setFrame(contentRect, display: true)
         setupWindow()
     }
     
@@ -45,6 +48,8 @@ public final class WallpaperWindow: NSWindow {
         self.isReleasedWhenClosed = false
         self.backgroundColor = .black
         self.contentView = playerView
+        self.playerView.frame = NSRect(origin: .zero, size: self.frame.size)
+        self.playerView.autoresizingMask = [.width, .height]
     }
     
     public func prepareForTeardown() {

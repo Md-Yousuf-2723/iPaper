@@ -66,6 +66,7 @@ public final class WallpaperEngine: ObservableObject {
         // Create or configure window
         let window = WallpaperWindow(screen: screen, displayID: displayID)
         window.playerView.setPlayer(queuePlayer)
+        window.setFrame(screen.frame, display: true)
         window.orderFrontRegardless()
         
         queuePlayer.play()

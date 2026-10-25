@@ -37,7 +37,7 @@ public struct DisplaySelectorView: View {
                     displayCard(
                         title: display.displayTitle,
                         subtitle: display.resolutionString,
-                        icon: display.isMain ? "laptopcomputer" : "display",
+                        icon: display.isBuiltin ? "laptopcomputer" : "display",
                         isSelected: appState.targetDisplayID == display.id
                     ) {
                         appState.targetDisplayID = display.id

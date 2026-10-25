@@ -105,6 +105,16 @@ public final class AppState: ObservableObject {
         UserDefaults.standard.removeObject(forKey: lastDisplayKey)
     }
     
+    public func removeFromRecents(_ item: VideoMetadata) {
+        self.recentWallpapers.removeAll(where: { $0.fileURL == item.fileURL })
+        saveRecents()
+    }
+    
+    public func clearAllRecents() {
+        self.recentWallpapers.removeAll()
+        saveRecents()
+    }
+    
     private func addToRecents(_ item: VideoMetadata) {
         var recents = recentWallpapers.filter { $0.fileURL != item.fileURL }
         recents.insert(item, at: 0)

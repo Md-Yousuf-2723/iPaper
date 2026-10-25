@@ -60,6 +60,12 @@ func runTests() async {
     assertTest(state.errorMessage == nil, "Initial error message is nil")
     assertTest(!state.isDropTargeted, "Drop targeted initial state is false")
 
+    // Test Recent Wallpapers removal
+    state.removeFromRecents(metadata)
+    assertTest(!state.recentWallpapers.contains(where: { $0.fileURL == metadata.fileURL }), "Item removed from recents successfully")
+    state.clearAllRecents()
+    assertTest(state.recentWallpapers.isEmpty, "Clear all recents clears array")
+
     // MARK: - 4. VideoValidator Unit Tests (MOV & MP4)
     print("\n[Suite 4] VideoValidator Tests:")
     let validator = VideoValidator()
@@ -200,6 +206,21 @@ func runTests() async {
         let displays = DisplayInfo.currentDisplays()
         for d in displays {
             assertTest(engine.isWallpaperActive(on: d.id), "Wallpaper active on display: \(d.name)")
+        }
+
+        // Validate window coordinates for every screen (ensures secondary screens are not shifted off-screen)
+        for screen in NSScreen.screens {
+            let win = WallpaperWindow(screen: screen, displayID: 0)
+            assertTest(win.frame == screen.frame, "WallpaperWindow matches exact screen frame for \(screen.localizedName) (\(win.frame))")
+            win.orderOut(nil)
+        }
+
+        // Test applying specifically to secondary display if present
+        if displays.count > 1, let secondary = displays.last {
+            autoreleasepool {
+                engine.apply(videoURL: testVideoPath, forDisplayID: secondary.id)
+            }
+            assertTest(engine.isWallpaperActive(on: secondary.id), "Successfully targeted and applied wallpaper to secondary display: \(secondary.name)")
         }
 
         // Test display selection and stopping on specific display

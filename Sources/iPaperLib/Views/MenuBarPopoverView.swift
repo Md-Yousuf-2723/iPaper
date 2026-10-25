@@ -126,6 +126,13 @@ public struct MenuBarPopoverView: View {
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                appState.removeFromRecents(item)
+                            } label: {
+                                Label("Remove from Recents", systemImage: "trash")
+                            }
+                        }
                     }
                 }
             }
