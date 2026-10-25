@@ -12,7 +12,35 @@
 
 For Mac m1, m2, m3, m4 and later apple chips
 
-## Homebrew Installation
+## Installation
+
+### 1. Check if Homebrew is Installed
+
+Run this command in Terminal to check if Homebrew is installed:
+
+```bash
+brew --version
+```
+
+### 2. If Homebrew is Installed
+
+Run:
+
+```bash
+brew tap md-yousuf-2723/tap
+brew trust md-yousuf-2723/tap
+brew install --cask ipaper
+```
+
+### 3. If Homebrew is Not Installed
+
+First, install Homebrew:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Then, install iPaper:
 
 ```bash
 brew tap md-yousuf-2723/tap
