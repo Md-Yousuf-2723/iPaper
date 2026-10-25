@@ -4,7 +4,7 @@ import CoreMedia
 
 public enum VideoValidationError: LocalizedError, Equatable {
     case fileDoesNotExist(URL)
-    case notMOVFormat(URL)
+    case unsupportedFormat(URL)
     case unreadableFile(String)
     case noVideoTrackFound
     case unsupportedCodec(String)
@@ -14,14 +14,14 @@ public enum VideoValidationError: LocalizedError, Equatable {
         switch self {
         case .fileDoesNotExist(let url):
             return "File does not exist at: \(url.lastPathComponent)"
-        case .notMOVFormat:
-            return "Only .mov QuickTime video files are supported. Please select a valid .mov file."
+        case .unsupportedFormat:
+            return "Only .mov and .mp4 video files are supported. Please select a valid .mov or .mp4 file."
         case .unreadableFile(let msg):
             return "Unable to read video file: \(msg)"
         case .noVideoTrackFound:
-            return "The selected MOV file does not contain any playable video stream."
+            return "The selected video file does not contain any playable video stream."
         case .unsupportedCodec(let codec):
-            return "Unsupported video codec '\(codec)'. iPaper supports H.264, HEVC (H.265), and Apple ProRes MOV files."
+            return "Unsupported video codec '\(codec)'. iPaper supports H.264, HEVC (H.265), and Apple ProRes video files."
         case .unplayableMedia(let reason):
             return "This media cannot be played by macOS: \(reason)"
         }
@@ -37,10 +37,10 @@ public struct VideoValidator: Sendable {
             throw VideoValidationError.fileDoesNotExist(url)
         }
         
-        // 2. Verify extension is MOV
+        // 2. Verify extension is MOV or MP4
         let ext = url.pathExtension.lowercased()
-        guard ext == "mov" else {
-            throw VideoValidationError.notMOVFormat(url)
+        guard ext == "mov" || ext == "mp4" else {
+            throw VideoValidationError.unsupportedFormat(url)
         }
         
         // 3. Inspect file attributes
@@ -81,11 +81,11 @@ public struct VideoValidator: Sendable {
         
         // 7. Inspect Codec
         let formatDescriptions = try await track.load(.formatDescriptions)
-        var codecName = "MOV Video"
+        var codecName = ext == "mp4" ? "MP4 Video" : "MOV Video"
         
         if let desc = formatDescriptions.first {
             let subType = CMFormatDescriptionGetMediaSubType(desc)
-            codecName = formatCodecName(for: subType)
+            codecName = formatCodecName(for: subType, ext: ext)
         }
         
         let width = Int(abs(naturalSize.width))
@@ -107,7 +107,7 @@ public struct VideoValidator: Sendable {
         )
     }
     
-    private func formatCodecName(for code: FourCharCode) -> String {
+    private func formatCodecName(for code: FourCharCode, ext: String) -> String {
         switch code {
         case kCMVideoCodecType_H264:
             return "H.264 / AVC"
@@ -130,7 +130,7 @@ public struct VideoValidator: Sendable {
                 (code >> 8) & 0xff,
                 code & 0xff
             ).trimmingCharacters(in: .whitespaces)
-            return fourCC.isEmpty ? "QuickTime Video" : fourCC.uppercased()
+            return fourCC.isEmpty ? (ext == "mp4" ? "MPEG-4 Video" : "QuickTime Video") : fourCC.uppercased()
         }
     }
 }

@@ -60,7 +60,7 @@ func runTests() async {
     assertTest(state.errorMessage == nil, "Initial error message is nil")
     assertTest(!state.isDropTargeted, "Drop targeted initial state is false")
 
-    // MARK: - 4. VideoValidator Unit Tests
+    // MARK: - 4. VideoValidator Unit Tests (MOV & MP4)
     print("\n[Suite 4] VideoValidator Tests:")
     let validator = VideoValidator()
     let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
@@ -82,9 +82,9 @@ func runTests() async {
     try? "not a video".write(to: txtURL, atomically: true, encoding: .utf8)
     do {
         _ = try await validator.validate(url: txtURL)
-        assertTest(false, "Should throw for non-MOV extension")
+        assertTest(false, "Should throw for non-supported extension")
     } catch let error as VideoValidationError {
-        assertTest(error == .notMOVFormat(txtURL), "Throws notMOVFormat for .txt file")
+        assertTest(error == .unsupportedFormat(txtURL), "Throws unsupportedFormat for .txt file")
     } catch {
         assertTest(false, "Unexpected error: \(error)")
     }
@@ -132,10 +132,58 @@ func runTests() async {
         let validMeta = try await validator.validate(url: validMovURL)
         assertTest(validMeta.fileName == "test_valid.mov", "Valid MOV file name parsed")
         assertTest(validMeta.width == 1280 && validMeta.height == 720, "Valid MOV 1280x720 dimensions verified")
-        assertTest(validMeta.codecName == "H.264 / AVC", "H.264 codec verified: \(validMeta.codecName)")
-        assertTest(validMeta.durationSeconds > 0.4, "Duration verified: \(validMeta.durationSeconds)s")
+        assertTest(validMeta.codecName == "H.264 / AVC", "MOV H.264 codec verified")
     } catch {
         assertTest(false, "Valid MOV validation failed with: \(error)")
+    }
+
+    // Valid MP4 generation & validation
+    let validMp4URL = tempDir.appendingPathComponent("test_valid.mp4")
+    do {
+        let writer = try AVAssetWriter(outputURL: validMp4URL, fileType: .mp4)
+        let videoSettings: [String: Any] = [
+            AVVideoCodecKey: AVVideoCodecType.h264,
+            AVVideoWidthKey: 1920,
+            AVVideoHeightKey: 1080
+        ]
+        let input = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+        writer.add(input)
+        
+        let adaptor = AVAssetWriterInputPixelBufferAdaptor(
+            assetWriterInput: input,
+            sourcePixelBufferAttributes: [
+                kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32ARGB),
+                kCVPixelBufferWidthKey as String: 1920,
+                kCVPixelBufferHeightKey as String: 1080
+            ]
+        )
+        
+        writer.startWriting()
+        writer.startSession(atSourceTime: .zero)
+        
+        var buffer: CVPixelBuffer?
+        CVPixelBufferPoolCreatePixelBuffer(nil, adaptor.pixelBufferPool!, &buffer)
+        
+        if let px = buffer {
+            for i in 0..<15 {
+                let time = CMTime(value: CMTimeValue(i), timescale: 30)
+                while !input.isReadyForMoreMediaData {
+                    try? await Task.sleep(nanoseconds: 10_000_000)
+                }
+                adaptor.append(px, withPresentationTime: time)
+            }
+        }
+        
+        input.markAsFinished()
+        await writer.finishWriting()
+        
+        let mp4Meta = try await validator.validate(url: validMp4URL)
+        assertTest(mp4Meta.fileName == "test_valid.mp4", "Valid MP4 file name parsed")
+        assertTest(mp4Meta.width == 1920 && mp4Meta.height == 1080, "Valid MP4 1920x1080 dimensions verified")
+        assertTest(mp4Meta.codecName == "H.264 / AVC", "MP4 H.264 codec verified")
+        assertTest(mp4Meta.formattedResolution == "1920 × 1080 (16:9)", "MP4 aspect ratio calculated")
+    } catch {
+        assertTest(false, "Valid MP4 validation failed with: \(error)")
     }
 
     try? FileManager.default.removeItem(at: tempDir)

@@ -10,13 +10,12 @@ public struct MainWindowView: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            // Header Bar
+            // Glossy Header Bar
             headerView
             
-            Divider()
-            
+            // Content Area
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 22) {
                     // Error message alert banner
                     if let error = appState.errorMessage {
                         errorBanner(error)
@@ -34,68 +33,91 @@ public struct MainWindowView: View {
                     // Display Selector
                     DisplaySelectorView(appState: appState)
                     
-                    // Destination Selector
-                    destinationSelector
-                    
                     // Recent Wallpapers
                     RecentWallpapersView(appState: appState)
                 }
                 .padding(24)
             }
             
-            Divider()
-            
-            // Bottom Action Bar
+            // Glossy Bottom Action Bar
             bottomActionBar
         }
-        .frame(minWidth: 540, idealWidth: 600, minHeight: 650, idealHeight: 700)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .frame(minWidth: 540, idealWidth: 600, minHeight: 600, idealHeight: 660)
+        .background(
+            ZStack {
+                Color(nsColor: .windowBackgroundColor)
+                LinearGradient(
+                    colors: [
+                        Color.accentColor.opacity(0.04),
+                        Color.clear,
+                        Color.accentColor.opacity(0.02)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
+        )
     }
     
     // MARK: - Header
     private var headerView: some View {
-        HStack(spacing: 12) {
-            // Logo Image
-            if let logoImg = loadLogoImage() {
-                Image(nsImage: logoImg)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 36, height: 36)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            } else {
-                Image(systemName: "sparkles.tv")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 28, height: 28)
-                    .foregroundColor(.accentColor)
+        HStack(spacing: 14) {
+            // Logo Image with glossy frame
+            ZStack {
+                if let logoImg = loadLogoImage() {
+                    Image(nsImage: logoImg)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [Color.white.opacity(0.4), Color.white.opacity(0.1)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1
+                                )
+                        )
+                        .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
+                } else {
+                    Image(systemName: "sparkles.tv")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .foregroundColor(.accentColor)
+                }
             }
             
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
                     Text("iPaper")
-                        .font(.title3)
-                        .fontWeight(.bold)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
                     
                     // Status Badge
                     if appState.isPlaying {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 5) {
                             Circle()
                                 .fill(Color.green)
-                                .frame(width: 7, height: 7)
-                            Text("Wallpaper Active")
-                                .font(.caption2)
-                                .fontWeight(.semibold)
+                                .frame(width: 6.5, height: 6.5)
+                            Text("Active")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
                                 .foregroundColor(.green)
                         }
-                        .padding(.horizontal, 8)
+                        .padding(.horizontal, 9)
                         .padding(.vertical, 3)
-                        .background(Color.green.opacity(0.12))
-                        .clipShape(Capsule())
+                        .background(
+                            Capsule()
+                                .fill(Color.green.opacity(0.14))
+                                .overlay(Capsule().stroke(Color.green.opacity(0.35), lineWidth: 0.8))
+                        )
                     }
                 }
                 
-                Text("Native macOS Live Video Wallpaper")
-                    .font(.caption)
+                Text("Native macOS Live Wallpaper")
+                    .font(.system(size: 11.5, weight: .regular, design: .rounded))
                     .foregroundColor(.secondary)
             }
             
@@ -107,86 +129,23 @@ public struct MainWindowView: View {
                 set: { _ in appState.toggleLaunchAtLogin() }
             )) {
                 Text("Launch at Login")
-                    .font(.caption)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundColor(.secondary)
             }
             .toggleStyle(.checkbox)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 14)
-        .background(.ultraThinMaterial)
-    }
-    
-    // MARK: - Destination Selector
-    private var destinationSelector: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Destination")
-                .font(.subheadline)
-                .fontWeight(.medium)
-            
-            HStack(spacing: 12) {
-                // Desktop Option (Active)
-                HStack(spacing: 8) {
-                    Image(systemName: "menubar.dock.rectangle")
-                        .foregroundColor(.accentColor)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text("Desktop Wallpaper")
-                            .font(.system(size: 13, weight: .semibold))
-                        Text("Renders behind desktop windows & icons")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.accentColor)
-                }
-                .padding(10)
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.accentColor.opacity(0.08))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.accentColor.opacity(0.5), lineWidth: 1)
-                        )
+        .background(
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    Rectangle()
+                        .fill(Color.white.opacity(0.08))
+                        .frame(height: 1),
+                    alignment: .bottom
                 )
-                
-                // Lock Screen Option (Disabled with explanation)
-                HStack(spacing: 8) {
-                    Image(systemName: "lock.laptopcomputer")
-                        .foregroundColor(.secondary)
-                    VStack(alignment: .leading, spacing: 1) {
-                        HStack(spacing: 4) {
-                            Text("Lock Screen")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.secondary)
-                            Text("Restricted")
-                                .font(.system(size: 9, weight: .bold))
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 1)
-                                .background(Color.secondary.opacity(0.15))
-                                .foregroundColor(.secondary)
-                                .clipShape(Capsule())
-                        }
-                        Text("macOS isolates lock screen for security")
-                            .font(.caption2)
-                            .foregroundColor(.secondary.opacity(0.8))
-                    }
-                    Spacer()
-                }
-                .padding(10)
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.secondary.opacity(0.05))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.secondary.opacity(0.12), lineWidth: 1)
-                        )
-                )
-                .help("Apple macOS isolates the Lock Screen inside system daemons without public live wallpaper APIs.")
-            }
-        }
+        )
     }
     
     // MARK: - Error Banner
@@ -195,23 +154,24 @@ public struct MainWindowView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.red)
             Text(message)
-                .font(.subheadline)
+                .font(.system(size: 12.5, weight: .medium, design: .rounded))
                 .foregroundColor(.red)
             Spacer()
             Button {
                 appState.errorMessage = nil
             } label: {
                 Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.secondary)
             }
             .buttonStyle(.plain)
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 12)
                 .fill(Color.red.opacity(0.1))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.red.opacity(0.3), lineWidth: 1)
                 )
         )
@@ -225,10 +185,12 @@ public struct MainWindowView: View {
                     appState.stopWallpaper()
                 } label: {
                     Label("Stop Wallpaper", systemImage: "stop.fill")
-                        .padding(.horizontal, 8)
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
                 }
                 .buttonStyle(.bordered)
-                .controlSize(.large)
+                .controlSize(.regular)
             }
             
             Spacer()
@@ -236,21 +198,32 @@ public struct MainWindowView: View {
             Button {
                 appState.applyCurrentWallpaper()
             } label: {
-                HStack(spacing: 6) {
+                HStack(spacing: 7) {
                     Image(systemName: "play.circle.fill")
+                        .font(.system(size: 15))
                     Text("Apply Live Wallpaper")
+                        .font(.system(size: 13.5, weight: .semibold, design: .rounded))
                 }
-                .fontWeight(.semibold)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 4)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 7)
             }
             .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .controlSize(.regular)
             .disabled(appState.selectedVideo == nil)
+            .shadow(color: appState.selectedVideo != nil ? Color.accentColor.opacity(0.3) : Color.clear, radius: 8, x: 0, y: 3)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 14)
-        .background(.ultraThinMaterial)
+        .background(
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    Rectangle()
+                        .fill(Color.white.opacity(0.08))
+                        .frame(height: 1),
+                    alignment: .top
+                )
+        )
     }
     
     private func loadLogoImage() -> NSImage? {

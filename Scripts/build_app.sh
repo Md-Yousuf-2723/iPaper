@@ -4,8 +4,8 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$DIR"
 
-VERSION="1.0.1"
-BUILD_NUM="2"
+VERSION="1.0.2"
+BUILD_NUM="3"
 
 echo "=== Building iPaper (Release v${VERSION}) ==="
 swift build -c release

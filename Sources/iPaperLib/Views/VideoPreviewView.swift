@@ -59,25 +59,37 @@ public struct VideoPreviewView: View {
     
     public var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            // Preview Player
+            // Preview Player with glossy frame
             ZStack(alignment: .bottomTrailing) {
                 AVPlayerRepresentable(player: model.player)
-                    .frame(height: 220)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .frame(height: 230)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [Color.white.opacity(0.35), Color.white.opacity(0.05)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
                     )
+                    .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 6)
                 
                 HStack(spacing: 8) {
                     Button {
                         model.togglePlay()
                     } label: {
                         Image(systemName: model.isPlaying ? "pause.fill" : "play.fill")
-                            .font(.system(size: 14, weight: .semibold))
-                            .padding(8)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.primary)
+                            .padding(9)
                             .background(.ultraThinMaterial)
                             .clipShape(Circle())
+                            .overlay(
+                                Circle().stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
                     }
                     .buttonStyle(.plain)
                     
@@ -85,53 +97,67 @@ public struct VideoPreviewView: View {
                         onClear()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 12, weight: .bold))
-                            .padding(8)
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.secondary)
+                            .padding(9)
                             .background(.ultraThinMaterial)
                             .clipShape(Circle())
+                            .overlay(
+                                Circle().stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
                     }
                     .buttonStyle(.plain)
                     .help("Choose different video")
                 }
-                .padding(10)
+                .padding(12)
             }
             
             // Video Details Chips
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text(metadata.fileName)
-                        .font(.headline)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .lineLimit(1)
                         .truncationMode(.middle)
                     
                     Spacer()
                     
                     Text(metadata.codecName)
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.accentColor.opacity(0.12))
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 3.5)
+                        .background(
+                            Capsule()
+                                .fill(Color.accentColor.opacity(0.15))
+                                .overlay(Capsule().stroke(Color.accentColor.opacity(0.35), lineWidth: 1))
+                        )
                         .foregroundColor(.accentColor)
-                        .clipShape(Capsule())
                 }
                 
-                HStack(spacing: 12) {
-                    badge(icon: "aspectratio", text: metadata.formattedResolution)
-                    badge(icon: "clock", text: metadata.formattedDuration)
-                    badge(icon: "speedometer", text: metadata.formattedFrameRate)
-                    badge(icon: "internaldrive", text: metadata.formattedFileSize)
+                HStack(spacing: 10) {
+                    cozyBadge(icon: "aspectratio", text: metadata.formattedResolution)
+                    cozyBadge(icon: "clock.fill", text: metadata.formattedDuration)
+                    cozyBadge(icon: "speedometer", text: metadata.formattedFrameRate)
+                    cozyBadge(icon: "internaldrive.fill", text: metadata.formattedFileSize)
                 }
             }
         }
-        .padding(12)
+        .padding(14)
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(nsColor: .controlBackgroundColor).opacity(0.6))
+            RoundedRectangle(cornerRadius: 18)
+                .fill(.ultraThinMaterial)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.35), Color.white.opacity(0.06)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
                 )
+                .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 3)
         )
         .onAppear {
             model.setup(with: metadata.fileURL)
@@ -144,15 +170,22 @@ public struct VideoPreviewView: View {
         }
     }
     
-    private func badge(icon: String, text: String) -> some View {
+    private func cozyBadge(icon: String, text: String) -> some View {
         HStack(spacing: 4) {
             Image(systemName: icon)
-                .font(.system(size: 11))
+                .font(.system(size: 10))
                 .foregroundColor(.secondary)
             Text(text)
-                .font(.caption)
+                .font(.system(size: 11, weight: .medium, design: .rounded))
                 .foregroundColor(.secondary)
         }
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(
+            Capsule()
+                .fill(Color.white.opacity(0.06))
+                .overlay(Capsule().stroke(Color.white.opacity(0.12), lineWidth: 0.8))
+        )
     }
 }
 

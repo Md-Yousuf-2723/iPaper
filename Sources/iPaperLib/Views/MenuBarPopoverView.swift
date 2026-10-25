@@ -15,8 +15,7 @@ public struct MenuBarPopoverView: View {
             // Header
             HStack {
                 Text("iPaper")
-                    .font(.headline)
-                    .fontWeight(.bold)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
                 
                 Spacer()
                 
@@ -26,17 +25,17 @@ public struct MenuBarPopoverView: View {
                             .fill(Color.green)
                             .frame(width: 6, height: 6)
                         Text("Active")
-                            .font(.caption2)
-                            .fontWeight(.semibold)
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
                             .foregroundColor(.green)
                     }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.green.opacity(0.12))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2.5)
+                    .background(Color.green.opacity(0.14))
                     .clipShape(Capsule())
+                    .overlay(Capsule().stroke(Color.green.opacity(0.35), lineWidth: 0.8))
                 } else {
                     Text("Paused")
-                        .font(.caption2)
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
                         .foregroundColor(.secondary)
                 }
             }
@@ -45,26 +44,30 @@ public struct MenuBarPopoverView: View {
             if let current = appState.selectedVideo {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Current Live Wallpaper")
-                        .font(.caption2)
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
                         .foregroundColor(.secondary)
                     
                     Text(current.fileName)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: 12.5, weight: .semibold, design: .rounded))
                         .lineLimit(1)
                     
-                    HStack(spacing: 8) {
+                    HStack(spacing: 6) {
                         Text(current.codecName)
                         Text("•")
                         Text(current.formattedDuration)
                     }
-                    .font(.caption2)
+                    .font(.system(size: 10.5, weight: .regular, design: .rounded))
                     .foregroundColor(.secondary)
                 }
-                .padding(8)
+                .padding(9)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(nsColor: .controlBackgroundColor).opacity(0.6))
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.white.opacity(0.06))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                        )
                 )
             }
             
@@ -75,6 +78,7 @@ public struct MenuBarPopoverView: View {
                         appState.stopWallpaper()
                     } label: {
                         Label("Stop Wallpaper", systemImage: "stop.fill")
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
@@ -83,6 +87,7 @@ public struct MenuBarPopoverView: View {
                         appState.applyCurrentWallpaper()
                     } label: {
                         Label("Start Wallpaper", systemImage: "play.fill")
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
@@ -94,8 +99,7 @@ public struct MenuBarPopoverView: View {
                 Divider()
                 
                 Text("Recent")
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundColor(.secondary)
                 
                 VStack(spacing: 4) {
@@ -105,15 +109,15 @@ public struct MenuBarPopoverView: View {
                         } label: {
                             HStack {
                                 Image(systemName: "film")
-                                    .font(.caption)
+                                    .font(.system(size: 11))
                                     .foregroundColor(.secondary)
                                 Text(item.fileName)
-                                    .font(.system(size: 12))
+                                    .font(.system(size: 11.5, weight: .medium, design: .rounded))
                                     .lineLimit(1)
                                 Spacer()
                                 if appState.selectedVideo?.fileURL == item.fileURL && appState.isPlaying {
                                     Image(systemName: "checkmark")
-                                        .font(.caption)
+                                        .font(.system(size: 11, weight: .bold))
                                         .foregroundColor(.accentColor)
                                 }
                             }
@@ -135,7 +139,9 @@ public struct MenuBarPopoverView: View {
                 } label: {
                     HStack {
                         Image(systemName: "macwindow")
+                            .font(.system(size: 12))
                         Text("Open iPaper Window")
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                         Spacer()
                     }
                     .padding(.vertical, 4)
@@ -148,7 +154,9 @@ public struct MenuBarPopoverView: View {
                 } label: {
                     HStack {
                         Image(systemName: "power")
+                            .font(.system(size: 12))
                         Text("Quit iPaper")
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                         Spacer()
                     }
                     .padding(.vertical, 4)
