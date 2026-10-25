@@ -10,9 +10,7 @@
 
 ## System Architecture
 
-- **Desktop Window Layering**: Operates at WindowServer layer `kCGDesktopIconWindowLevelKey - 1` (`-2147483604`). Videos render seamlessly behind Finder desktop icons, allowing mouse clicks, window movements, and drag-and-drop operations to pass through unhindered.
-- **Hardware-Accelerated Decoding**: Utilizes AVFoundation and Apple Silicon's hardware Media Engine (H.264, HEVC, and Apple ProRes) for smooth continuous playback without unnecessary CPU overhead.
-- **Background Persistence**: Closing the configuration window or closing the app from the Dock dynamically switches the application to background accessory mode. The live wallpaper continues uninterrupted and the status control remains active in the top-right menu bar.
+For Mac m1, m2, m3, m4 and later apple chips
 
 ## Homebrew Installation
 
