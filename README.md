@@ -19,6 +19,32 @@ brew tap Md-Yousuf-2723/tap
 brew install --cask ipaper
 ```
 
+### Trust & Security (Gatekeeper)
+
+Because iPaper is an independent open-source project and not distributed through the Mac App Store, macOS Gatekeeper may display an "unidentified developer" prompt. 
+
+You can install and trust it directly using Homebrew's `--no-quarantine` flag:
+
+```bash
+brew install --cask --no-quarantine ipaper
+```
+
+If already installed and blocked by Gatekeeper, allow it to run with:
+
+```bash
+xattr -cr /Applications/iPaper.app
+```
+
+> **Verification:** Every release binary is cryptographically verified by Homebrew against an immutable SHA-256 checksum to guarantee authenticity and prevent tampering.
+
+## Homebrew Update
+
+To update iPaper to the latest version at any time:
+
+```bash
+brew upgrade --cask ipaper
+```
+
 ## Homebrew Uninstallation
 
 To completely remove iPaper and all associated files (preferences, caches, and saved states):
