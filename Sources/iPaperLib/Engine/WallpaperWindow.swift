@@ -42,8 +42,14 @@ public final class WallpaperWindow: NSWindow {
         self.hasShadow = false
         self.ignoresMouseEvents = true
         self.canHide = false
+        self.isReleasedWhenClosed = false
         self.backgroundColor = .black
         self.contentView = playerView
+    }
+    
+    public func prepareForTeardown() {
+        self.playerView.prepareForTeardown()
+        self.contentView = nil
     }
     
     public func updateFrame(to newFrame: NSRect) {

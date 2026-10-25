@@ -78,6 +78,10 @@ public final class WallpaperEngine: ObservableObject {
         print("[WallpaperEngine] Applied wallpaper on display \(displayID): \(videoURL.lastPathComponent)")
     }
     
+    public func isWallpaperActive(on displayID: CGDirectDisplayID) -> Bool {
+        return windows[displayID] != nil
+    }
+    
     public func stop(displayID: CGDirectDisplayID? = nil) {
         if let displayID = displayID {
             stopScreen(displayID: displayID)
@@ -90,17 +94,23 @@ public final class WallpaperEngine: ObservableObject {
     }
     
     private func stopScreen(displayID: CGDirectDisplayID) {
+        // 1. Disable and remove looper first to avoid KVO conflicts on player mutation
+        if let looper = loopers[displayID] {
+            looper.disableLooping()
+        }
+        loopers.removeValue(forKey: displayID)
+        
+        // 2. Safely pause and clear queue items
         if let player = players[displayID] {
             player.pause()
             player.removeAllItems()
         }
         players.removeValue(forKey: displayID)
-        loopers.removeValue(forKey: displayID)
         
+        // 3. Tear down view hierarchy and order out without calling destructive window.close()
         if let window = windows[displayID] {
-            window.playerView.setPlayer(nil)
+            window.prepareForTeardown()
             window.orderOut(nil)
-            window.close()
         }
         windows.removeValue(forKey: displayID)
         activeWallpapers.removeValue(forKey: displayID)

@@ -26,6 +26,11 @@ public final class VideoPlayerView: NSView {
         playerLayer.player = player
     }
     
+    public func prepareForTeardown() {
+        playerLayer.player = nil
+        playerLayer.removeFromSuperlayer()
+    }
+    
     public override func layout() {
         super.layout()
         CATransaction.begin()

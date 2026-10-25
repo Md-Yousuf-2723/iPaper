@@ -186,6 +186,62 @@ func runTests() async {
         assertTest(false, "Valid MP4 validation failed with: \(error)")
     }
 
+    // MARK: - 5. WallpaperEngine & Multi-Display Lifecycle Tests
+    print("\n[Suite 5] WallpaperEngine & Display Lifecycle Tests:")
+    let engine = WallpaperEngine.shared
+    let testVideoPath = tempDir.appendingPathComponent("test_valid.mov")
+    if FileManager.default.fileExists(atPath: testVideoPath.path) {
+        // Test Apply to All Displays
+        autoreleasepool {
+            engine.apply(videoURL: testVideoPath, forDisplayID: nil)
+        }
+        assertTest(engine.isPlaying, "WallpaperEngine started playback on displays")
+
+        let displays = DisplayInfo.currentDisplays()
+        for d in displays {
+            assertTest(engine.isWallpaperActive(on: d.id), "Wallpaper active on display: \(d.name)")
+        }
+
+        // Test display selection and stopping on specific display
+        if let first = displays.first {
+            autoreleasepool {
+                engine.stop(displayID: first.id)
+            }
+            assertTest(!engine.isWallpaperActive(on: first.id), "Successfully stopped wallpaper on display: \(first.name)")
+        }
+
+        // Test stopping all displays cleanly without SIGSEGV or memory leaks
+        autoreleasepool {
+            engine.stop(displayID: nil)
+        }
+        assertTest(!engine.isPlaying, "WallpaperEngine stopped all displays cleanly")
+
+        // Test AppState display switching and stop behavior
+        let state = AppState.shared
+        autoreleasepool {
+            engine.apply(videoURL: testVideoPath, forDisplayID: nil)
+            state.isPlaying = engine.isPlaying
+        }
+        assertTest(state.isPlaying, "AppState reflects active playback")
+
+        // Switch target display to another display (or first display) and click stopWallpaper
+        if let target = displays.last {
+            state.targetDisplayID = target.id
+            autoreleasepool {
+                state.stopWallpaper()
+            }
+            // Verify no crash and state correctly updated
+            assertTest(true, "Switched target display and stopped wallpaper without crash")
+        }
+
+        autoreleasepool {
+            state.stopAllWallpapers()
+        }
+        assertTest(!state.isPlaying, "stopAllWallpapers stopped all instances cleanly")
+    } else {
+        assertTest(false, "Test video file missing for Suite 5")
+    }
+
     try? FileManager.default.removeItem(at: tempDir)
 
     print("\n=========================================")

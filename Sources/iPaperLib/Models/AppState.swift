@@ -74,7 +74,7 @@ public final class AppState: ObservableObject {
         
         UserDefaults.standard.set(video.fileURL.path, forKey: lastVideoPathKey)
         if let target = targetDisplayID {
-            UserDefaults.standard.set(target, forKey: lastDisplayKey)
+            UserDefaults.standard.set(Int(target), forKey: lastDisplayKey)
         } else {
             UserDefaults.standard.removeObject(forKey: lastDisplayKey)
         }
@@ -86,15 +86,23 @@ public final class AppState: ObservableObject {
     }
     
     public func stopWallpaper() {
-        engine.stop(displayID: targetDisplayID)
+        if let target = targetDisplayID, engine.isWallpaperActive(on: target) {
+            engine.stop(displayID: target)
+        } else {
+            engine.stop(displayID: nil)
+        }
         isPlaying = engine.isPlaying
-        UserDefaults.standard.removeObject(forKey: lastVideoPathKey)
+        if !isPlaying {
+            UserDefaults.standard.removeObject(forKey: lastVideoPathKey)
+            UserDefaults.standard.removeObject(forKey: lastDisplayKey)
+        }
     }
     
     public func stopAllWallpapers() {
         engine.stop(displayID: nil)
         isPlaying = false
         UserDefaults.standard.removeObject(forKey: lastVideoPathKey)
+        UserDefaults.standard.removeObject(forKey: lastDisplayKey)
     }
     
     private func addToRecents(_ item: VideoMetadata) {
@@ -118,6 +126,13 @@ public final class AppState: ObservableObject {
            let items = try? JSONDecoder().decode([VideoMetadata].self, from: data) {
             // Keep items that still exist on disk
             self.recentWallpapers = items.filter { FileManager.default.fileExists(atPath: $0.fileURL.path) }
+        }
+        
+        if UserDefaults.standard.object(forKey: lastDisplayKey) != nil {
+            let savedDisplay = CGDirectDisplayID(UserDefaults.standard.integer(forKey: lastDisplayKey))
+            if availableDisplays.contains(where: { $0.id == savedDisplay }) {
+                self.targetDisplayID = savedDisplay
+            }
         }
         
         if let savedPath = UserDefaults.standard.string(forKey: lastVideoPathKey) {
